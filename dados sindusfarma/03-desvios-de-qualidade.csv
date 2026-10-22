@@ -1,0 +1,17 @@
+﻿ID;Data;Área;Equipamento;Produto;Lote;Descrição;Classificação inicial;Status
+DSV-2026-101;22/09/2026;Linha 3 · Embalagem;Blistadeira BL-03;Dorvalix 500 mg comprimido;L26B114;Sensor de presença não rejeitou blísteres com alvéolo vazio durante 40 minutos após troca de formato.;Menor;Fechado
+DSV-2026-102;23/09/2026;Linha 1 · Granulação;Secador de leito fluidizado SLF-01;Glicontra 850 mg comprimido;L26C198;"Umidade residual do granulado acima do limite em duas amostras; lote reprocessado.";Maior;Fechado
+DSV-2026-103;24/09/2026;Área de líquidos;Tanque de preparo TQ-07;Respiflux xarope 120 mL;L26D033;Registro de temperatura do tanque ficou acima de 40 °C por 3 horas durante falha do chiller. Operador responsável: Carlos Henrique Prado.;Menor;Fechado
+DSV-2026-104;25/09/2026;Linha 3 · Embalagem;Blistadeira BL-03;Pressaneo 10 mg comprimido;L26A090;"Temperatura de selagem oscilou fora da faixa; teste de estanqueidade aprovado na reamostragem.";Menor;Fechado
+DSV-2026-105;29/09/2026;Área de semissólidos;Misturador MX-02;Dermaquil creme 30 g;L26B150;"Viscosidade no limite inferior da especificação; liberado após avaliação da qualidade.";Menor;Fechado
+DSV-2026-106;30/09/2026;Linha 2 · Compressão;Compressora CP-02;Dorvalix 500 mg comprimido;L26B131;"Dureza abaixo do especificado em 3 de 20 comprimidos no controle em processo; ajuste de força realizado.";Menor;Fechado
+DSV-2026-107;01/10/2026;Almoxarifado;Câmara fria CF-01;Vitanov gotas 20 mL;L26F041;"Lote de frascos conta-gotas recebido de novo fornecedor sem certificado de análise; liberado em caráter excepcional.";Maior;Aberto
+DSV-2026-108;02/10/2026;Linha 3 · Embalagem;Blistadeira BL-03;Dorvalix 500 mg comprimido;L26B131;Alvéolos vazios encontrados na inspeção final em 0,3% das unidades.;Menor;Fechado
+DSV-2026-109;05/10/2026;Linha 1 · Compressão;Compressora CP-01;Alergim 10 mg comprimido;L26E019;Resultado de teor no limite inferior (90,4%) em amostra de estabilidade de 3 meses.;Menor;Em investigação
+DSV-2026-110;06/10/2026;Área de líquidos;Envasadora EV-04;Respiflux xarope 120 mL;L26D047;Volume de envase abaixo do declarado em frascos do início do lote.;Menor;Fechado
+DSV-2026-111;07/10/2026;Linha 2 · Compressão;Compressora CP-02;Pressaneo 10 mg comprimido;L26A102;Resíduo de pó de outro produto encontrado na tremonha após limpeza de troca de produto.;Menor;Fechado
+DSV-2026-112;08/10/2026;Linha 3 · Embalagem;Codificadora CD-03;Glicontra 850 mg comprimido;L26C215;"Falha na tinta da codificadora; impressão de lote e validade com baixa nitidez em parte das caixas.";Menor;Fechado
+DSV-2026-113;09/10/2026;Área de semissólidos;Misturador MX-02;Dermaquil creme 30 g;L26B162;Tempo de homogeneização reduzido por falha no temporizador.;Maior;Em investigação
+DSV-2026-114;12/10/2026;Linha 3 · Embalagem;Blistadeira BL-03;Alergim 10 mg comprimido;L26E031;Sensor de presença desligado por 15 minutos para manutenção sem parada da linha.;Menor;Aberto
+DSV-2026-115;13/10/2026;Controle de qualidade;HPLC-05;Alergim 10 mg comprimido;L26E019;Reanálise de teor confirmou 89,1%, abaixo da especificação de 90–110%.;Crítico;Em investigação
+DSV-2026-116;14/10/2026;Área de líquidos;Tanque de preparo TQ-07;Respiflux xarope 120 mL;L26D052;"Nova falha do chiller; temperatura máxima de 38 °C por 1 hora.";Menor;Aberto

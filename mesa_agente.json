@@ -1,0 +1,138 @@
+{
+  "name": "Mesa · agente",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "964c4f79-7aa7-4c8c-bdb0-379a1f746925",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "49b037ac-97af-4da7-9b5d-7fe4bd9e5d72"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || {};\nconst rows = Array.isArray(b.rows) ? b.rows : [];\nconst linhas = rows.map((r,i)=>Object.entries(r).map(([k,v])=>`${k}: ${v}`).join(' | ')).join('\\n');\nreturn [{ json: { ...b, rows, n: rows.length, linhas, analise_txt: b.analise ? JSON.stringify(b.analise) : '' } }];"
+      },
+      "id": "8fe7d088-2098-4c5a-9a7a-4b61bf276e8c",
+      "name": "Normalizar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você vai operar exatamente como descrito no arquivo de agente abaixo. O arquivo define papel, objetivo, fontes autorizadas, limites, formato de saída e ponto de aprovação humana. Nunca ultrapasse esses limites. Quando a informação não estiver nas fontes, escreva NÃO LOCALIZADO. Marque suposições como HIPÓTESE. Termine lembrando quem precisa aprovar antes de qualquer uso.\nFormato de resposta (SOMENTE JSON):\n{\"resposta\": \"texto em markdown: títulos ##, listas, tabelas | e negrito; esta é a análise principal\",\n \"graficos\": [{\"titulo\": \"\", \"tipo\": \"bar | line | pie\", \"labels\": [\"...\"], \"valores\": [números], \"leitura\": \"uma frase sobre o que o gráfico mostra\"}],\n \"tabelas\": [{\"titulo\": \"\", \"colunas\": [\"...\"], \"linhas\": [[\"...\"]]}],\n \"confianca\": \"alta | média | baixa, com o motivo\"}\nRegras para gráficos e tabelas: só números calculados a partir dos dados fornecidos (contagens, somas, percentuais); diga a conta na leitura; nunca invente valores. Se o pedido for um dashboard ou relatório, entregue de 2 a 4 gráficos e pelo menos uma tabela. Se não houver dados, deixe graficos e tabelas vazios e explique.\n\n=== ARQUIVO DO AGENTE ===\n{{ $json.agente_md }}",
+              "role": "system"
+            },
+            {
+              "content": "=Mensagem do usuário: {{ $json.mensagem }}\n\nDados disponíveis ({{ $json.n }} linhas, pode estar vazio):\n{{ $json.linhas }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "141189cf-ecdf-4370-9591-f47bcdcf1bb0",
+      "name": "Modelo",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        480,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "SUBSTITUA",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.message.content) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "00aab5a5-0b1f-41c4-bfa0-2865a8cdaeb1",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar": {
+      "main": [
+        [
+          {
+            "node": "Modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

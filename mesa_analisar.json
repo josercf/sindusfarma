@@ -1,0 +1,138 @@
+{
+  "name": "Mesa · analisar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analisar",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "fd394bb6-bec1-49e5-8c87-b9d8f7a99ca7",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "24b7eb52-3622-45c2-877e-c1bf27415c51"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || {};\nconst rows = Array.isArray(b.rows) ? b.rows : [];\nconst linhas = rows.map((r,i)=>Object.entries(r).map(([k,v])=>`${k}: ${v}`).join(' | ')).join('\\n');\nreturn [{ json: { ...b, rows, n: rows.length, linhas, analise_txt: b.analise ? JSON.stringify(b.analise) : '' } }];"
+      },
+      "id": "1b5ad9b4-2048-4717-b0b7-d0dff482c97b",
+      "name": "Normalizar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é analista de farmacovigilância de uma indústria farmacêutica brasileira.\nTarefa: classificar cada relato recebido pelo SAC.\nClassificações possíveis: \"evento adverso\", \"queixa técnica\", \"evento adverso com queixa técnica\", \"pedido de informação\", \"outro\".\nGravidade: \"grave\" quando houver internação, risco de vida, convulsão, gestação exposta, superdose, reação alérgica importante; \"a avaliar\" quando a gravidade clínica for incerta; \"não grave\" nos demais; \"n/a\" quando não for evento adverso.\nRegras:\n- Use apenas o texto dos relatos. Não avalie causalidade. Não invente produto ou lote: quando não estiver identificado, escreva \"não localizado\".\n- Copie em \"trecho\" as palavras exatas do relato que justificam a classificação.\n- Em \"alerta\", aponte: possível duplicidade com outro ID, dados pessoais que não deveriam estar ali, suspeita de falsificação, lote com mais de um relato, falta de eficácia, exposição na gestação ou superdose.\n- Siga também as instruções extras do usuário, se houver.\nResponda SOMENTE em JSON com o formato:\n{\"resumo\": \"3 a 5 frases para um diretor, com números\", \"itens\": [{\"id\": \"\", \"classificacao\": \"\", \"gravidade\": \"\", \"motivo\": \"\", \"trecho\": \"\", \"alerta\": \"\"}], \"alertas\": [\"frases curtas com os pontos de atenção da base inteira, por exemplo lotes repetidos\"]}",
+              "role": "system"
+            },
+            {
+              "content": "=Instruções extras: {{ $json.instrucoes || 'nenhuma' }}\n\nRelatos ({{ $json.n }}):\n{{ $json.linhas }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "a78092ad-fefb-472a-915d-a744f8a9a824",
+      "name": "Modelo",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        480,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "SUBSTITUA",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.message.content) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "64046508-5aa6-4b3a-953b-b804fe2df728",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar": {
+      "main": [
+        [
+          {
+            "node": "Modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

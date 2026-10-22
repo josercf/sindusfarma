@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesa de Análise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b0a16; --bg2:#14122a; --panel:#1a1733; --panel2:#221e40; --line:#2e2a52;
+  --text:#f2f0fa; --muted:#a8a3c7; --coral:#ff5a47; --coral2:#ff8a5c; --mint:#5ee6b8; --amber:#ffc857; --red:#ff5a47; --blue:#7aa2ff;
+  --radius:16px; --shadow:0 20px 60px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(900px 500px at 10% -10%, rgba(255,90,71,.22), transparent 60%),
+  radial-gradient(800px 500px at 100% 0%, rgba(122,162,255,.16), transparent 60%),
+  radial-gradient(700px 500px at 50% 110%, rgba(94,230,184,.10), transparent 60%);}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--coral),var(--coral2));display:grid;place-items:center;font-weight:800;font-size:18px;color:#1a0b08;box-shadow:0 8px 24px rgba(255,90,71,.35)}
+.brand h1{font-size:20px;margin:0;letter-spacing:-.02em}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.status{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:999px;cursor:pointer}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(255,200,87,.15)}
+.dot.ok{background:var(--mint);box-shadow:0 0 0 4px rgba(94,230,184,.15)}
+.dot.bad{background:var(--red);box-shadow:0 0 0 4px rgba(255,90,71,.15)}
+nav{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);padding:6px;border-radius:14px;width:max-content;margin-bottom:22px}
+nav button{background:transparent;border:0;color:var(--muted);font:600 14px Inter;padding:10px 18px;border-radius:10px;cursor:pointer;transition:.2s}
+nav button.active{background:linear-gradient(135deg,var(--coral),var(--coral2));color:#1a0b08}
+nav button:not(.active):hover{color:var(--text);background:var(--panel2)}
+.view{display:none}.view.active{display:block}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1.1fr .9fr}.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--coral2)}
+.card h3{margin:0 0 14px;font-size:20px;letter-spacing:-.01em}
+.card p.sub{margin:-6px 0 16px;color:var(--muted);font-size:14px}
+.drop{border:1.5px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--muted);transition:.2s;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--coral);background:rgba(255,90,71,.06);color:var(--text)}
+.drop strong{color:var(--text)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:12px;padding:12px 18px;font:600 14px Inter;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:linear-gradient(135deg,var(--coral),var(--coral2));color:#1a0b08;box-shadow:0 8px 20px rgba(255,90,71,.3)}
+.btn.primary:hover{transform:translateY(-1px)}
+.btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .n{font-size:28px;font-weight:800;letter-spacing:-.03em}
+.kpi .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.kpi.coral .n{color:var(--coral)}.kpi.mint .n{color:var(--mint)}.kpi.amber .n{color:var(--amber)}.kpi.blue .n{color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:10px 8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+td{padding:10px 8px;border-bottom:1px solid rgba(46,42,82,.6);vertical-align:top}
+.tbl{max-height:420px;overflow:auto;border-radius:12px;border:1px solid var(--line)}
+.tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.03em}
+.tag.ea{background:rgba(255,90,71,.18);color:#ffb3aa}.tag.qt{background:rgba(255,200,87,.18);color:#ffe2a0}
+.tag.pi{background:rgba(122,162,255,.18);color:#c3d2ff}.tag.ou{background:rgba(168,163,199,.18);color:#d9d6ea}
+.tag.grave{background:var(--coral);color:#1a0b08}
+.quote{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);border-left:2px solid var(--coral);padding-left:8px}
+textarea,input,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font:14px Inter;outline:none;transition:.2s}
+textarea:focus,input:focus,select:focus{border-color:var(--coral)}
+textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 6px}
+.answer{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px;white-space:pre-wrap;line-height:1.55;font-size:14px}
+.answer h4{margin:14px 0 6px;font-size:12px;color:var(--coral2);text-transform:uppercase;letter-spacing:.08em}
+.answer ul{margin:0;padding-left:18px}
+.conf{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:rgba(94,230,184,.14);color:var(--mint);font-weight:700;font-size:12px}
+pre.md{background:#0a0914;border:1px solid var(--line);border-radius:14px;padding:16px;font:12.5px/1.6 "JetBrains Mono",monospace;color:#d9d6ea;white-space:pre-wrap;max-height:520px;overflow:auto;margin:0}
+.agents{display:flex;flex-direction:column;gap:8px}
+.agent{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer}
+.agent:hover{border-color:var(--coral)}
+.agent small{color:var(--muted)}
+.spinner{width:16px;height:16px;border:2px solid rgba(26,11,8,.3);border-top-color:#1a0b08;border-radius:50%;animation:spin .8s linear infinite}
+.ghost .spinner{border-color:rgba(255,255,255,.2);border-top-color:#fff}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2a2550;border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s}
+.toast.show{opacity:1}
+.toast.err{border-color:var(--coral)}
+.modal{position:fixed;inset:0;background:rgba(5,4,12,.7);display:none;place-items:center;z-index:50}
+.modal.open{display:grid}
+.modal .card{width:min(560px,92vw)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.chartbox{position:relative;height:240px}
+.empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:14px}
+.alert{background:rgba(255,200,87,.1);border:1px solid rgba(255,200,87,.35);border-radius:12px;padding:12px 14px;font-size:13px;margin-top:10px}
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
+.dash .card{padding:14px;box-shadow:none;background:var(--bg2)}
+.dash h5{margin:0 0 8px;font-size:12px;color:var(--coral2);text-transform:uppercase;letter-spacing:.08em}
+.dash .cb{position:relative;height:200px}
+.md-out h1,.md-out h2,.md-out h3{margin:12px 0 6px;font-size:15px;letter-spacing:-.01em}
+.md-out h1{font-size:17px}.md-out p{margin:6px 0}.md-out ul,.md-out ol{margin:4px 0;padding-left:20px}
+.md-out table{margin:8px 0;font-size:12.5px}.md-out code{font-family:"JetBrains Mono",monospace;font-size:12px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:5px}
+.md-out pre{background:#0a0914;border:1px solid var(--line);border-radius:10px;padding:10px;overflow:auto;font-size:12px}
+details.raw{margin-top:10px;font-size:12px;color:var(--muted)}details.raw pre{max-height:260px;overflow:auto;white-space:pre-wrap;font-size:11px}
+.footer{margin-top:30px;color:var(--muted);font-size:12px;text-align:center}
+.step{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;font-size:13px;color:var(--muted)}
+.step b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--coral);color:#1a0b08;font-size:12px;flex:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="logo">MA</div>
+    <div><h1>Mesa de Análise</h1><p>AI for Business · Sindusfarma · Encontro 2</p></div>
+  </div>
+  <div class="status" id="status" title="Configurar n8n"><span class="dot" id="dot"></span><span id="statusTxt">n8n não configurado</span></div>
+</header>
+
+<nav>
+  <button class="active" data-view="dados">Dados</button>
+  <button data-view="perguntas">Perguntas</button>
+  <button data-view="agentes">Agentes</button>
+</nav>
+
+<!-- DADOS -->
+<section class="view active" id="view-dados">
+  <div class="grid g2">
+    <div class="card">
+      <h2>1 · Entrada</h2><h3>Relatos recebidos</h3>
+      <p class="sub">CSV ou XLSX. Só dado fictício ou público entra aqui.</p>
+      <div class="drop" id="drop"><strong>Arraste a planilha</strong> ou clique para escolher<br><small>colunas livres; o modelo lê o que vier</small></div>
+      <input type="file" id="file" accept=".csv,.xlsx,.xls" hidden>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost" id="btnSample">Usar os 30 relatos de exemplo</button>
+        <button class="btn primary" id="btnAnalisar" disabled><span id="anSpin"></span>Analisar com IA</button>
+      </div>
+      <label>Instrução extra para o modelo (opcional)</label>
+      <textarea id="instrucoes" placeholder="Ex.: considere grave qualquer menção a internação, convulsão ou gestação."></textarea>
+      <div class="hint" id="rowsHint">Nenhum dado carregado.</div>
+    </div>
+    <div class="card">
+      <h2>2 · Leitura executiva</h2><h3>O que o modelo encontrou</h3>
+      <div id="resumo" class="empty">Carregue os dados e clique em Analisar.</div>
+      <div class="kpis" id="kpis" style="display:none">
+        <div class="kpi coral"><div class="n" id="kEA">0</div><div class="l">Eventos adversos</div></div>
+        <div class="kpi amber"><div class="n" id="kQT">0</div><div class="l">Queixas técnicas</div></div>
+        <div class="kpi blue"><div class="n" id="kPI">0</div><div class="l">Pedidos de info</div></div>
+        <div class="kpi mint"><div class="n" id="kGR">0</div><div class="l">Graves</div></div>
+      </div>
+      <div class="chartbox" id="chartbox" style="display:none"><canvas id="chart"></canvas></div>
+      <div id="alertas"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <h2>3 · Conferência</h2><h3>Linha a linha, com o trecho que justifica</h3>
+    <p class="sub">A classificação só vale depois que uma pessoa confere o trecho. Causalidade e decisão de notificar ficam com a farmacovigilância.</p>
+    <div class="tbl"><table id="tabela"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- PERGUNTAS -->
+<section class="view" id="view-perguntas">
+  <div class="grid g2">
+    <div class="card">
+      <h2>Decisão</h2><h3>Pergunte aos dados</h3>
+      <p class="sub">A resposta vem com a conta à vista, as evidências e o que foi suposto.</p>
+      <textarea id="pergunta" placeholder="Ex.: Quais lotes concentram mais de um relato e o que isso sugere? Ou: monte três cenários para a reunião de amanhã com a área de qualidade."></textarea>
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="btnPerguntar"><span id="pgSpin"></span>Perguntar</button>
+        <button class="btn ghost" data-q="Quais lotes aparecem em mais de um relato? Para cada um, liste os IDs e o possível desvio de qualidade.">Lotes repetidos</button>
+        <button class="btn ghost" data-q="Quais relatos exigem avaliação médica de gravidade mesmo sem internação? Cite o trecho de cada um.">Gravidade a avaliar</button>
+        <button class="btn ghost" data-q="Monte três cenários (otimista, base, pessimista) para o volume de eventos adversos do próximo mês. Mostre a conta e marque cada hipótese.">Cenários</button>
+      </div>
+      <div class="hint">Os dados carregados na aba Dados vão junto com a pergunta.</div>
+    </div>
+    <div class="card">
+      <h2>Resposta</h2><h3>Com evidência e incerteza</h3>
+      <div id="resposta" class="empty">Nenhuma pergunta ainda.</div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTES -->
+<section class="view" id="view-agentes">
+  <div class="grid g2">
+    <div class="card">
+      <h2>Desenho</h2><h3>Crie um agente em um arquivo .md</h3>
+      <p class="sub">Cada campo é uma decisão sua. O modelo executa dentro do que você escreveu aqui.</p>
+      <label>Nome</label><input id="agNome" placeholder="Triagem de relatos do SAC">
+      <label>Papel (quem ele é)</label><input id="agPapel" placeholder="Analista de farmacovigilância de uma indústria farmacêutica brasileira">
+      <label>Objetivo (o que entrega)</label><textarea id="agObjetivo" placeholder="Classificar cada relato recebido e apontar os graves, com o trecho que justifica."></textarea>
+      <label>Fontes autorizadas</label><textarea id="agFontes" placeholder="Apenas a planilha anexada. Bula aprovada do produto, quando fornecida."></textarea>
+      <label>O que não fazer</label><textarea id="agLimites" placeholder="Não avaliar causalidade. Não inventar produto ou lote. Quando faltar, escrever NÃO LOCALIZADO."></textarea>
+      <label>Formato de saída</label><input id="agFormato" placeholder="Tabela com ID, classificação, gravidade e trecho; ou: dashboard com gráficos por produto e por gravidade">
+      <label>Ponto de aprovação humana</label><input id="agAprovacao" placeholder="Farmacovigilância revisa antes de qualquer notificação">
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary" id="btnGerar">Gerar .md</button>
+        <button class="btn ghost" id="btnSalvar">Salvar na mesa</button>
+        <button class="btn ghost" id="btnBaixar">Baixar arquivo</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Arquivo</h2><h3>agente.md</h3>
+      <pre class="md" id="mdPreview"># Preencha o formulário e clique em Gerar .md</pre>
+      <label>Testar o agente com uma mensagem</label>
+      <textarea id="agMsg" placeholder="Classifique os relatos carregados e liste os graves."></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="btnTestar"><span id="agSpin"></span>Testar</button><span class="hint">Usa os dados da aba Dados, se houver.</span></div>
+      <div id="agResposta" class="answer" style="margin-top:12px;display:none"></div>
+      <label>Agentes salvos nesta mesa</label>
+      <div class="agents" id="agentList"><div class="hint">Nenhum agente salvo ainda.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">Mesa de Análise · página única, sem servidor próprio · chamadas vão para o n8n configurado · dados fictícios</div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <h2>Conexão</h2><h3>Onde está o seu n8n?</h3>
+    <label>URL base dos webhooks</label>
+    <input id="cfgUrl" placeholder="https://seu-n8n.app.n8n.cloud/webhook">
+    <div class="hint">Os caminhos usados são <code>/analisar</code>, <code>/perguntar</code> e <code>/agente</code>. Fica salvo só neste navegador.</div>
+    <div class="row" style="margin-top:16px"><button class="btn primary" id="cfgSave">Salvar e testar</button><button class="btn ghost" id="cfgClose">Fechar</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- estado ----------
+const S={rows:[],analise:null,chart:null,cfg:{}};
+const $=s=>document.querySelector(s);
+const toast=(m,err)=>{const t=$('#toast');t.textContent=m;t.className='toast show'+(err?' err':'');setTimeout(()=>t.className='toast',3500)};
+const ls={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- navegação ----------
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+b.dataset.view));
+});
+
+// ---------- config n8n ----------
+S.cfg=ls.get('mesa.cfg',{url:''});
+function setStatus(state,txt){$('#dot').className='dot '+(state||'');$('#statusTxt').textContent=txt}
+function renderCfg(){ if(S.cfg.url){setStatus('',`n8n: ${S.cfg.url.replace(/^https?:\/\//,'').slice(0,34)}`)} else setStatus('','n8n não configurado'); }
+renderCfg();
+$('#status').onclick=()=>{$('#cfgUrl').value=S.cfg.url||'';$('#modal').classList.add('open')};
+$('#cfgClose').onclick=()=>$('#modal').classList.remove('open');
+$('#cfgSave').onclick=async()=>{
+  S.cfg.url=$('#cfgUrl').value.trim().replace(/\/+$/,'');ls.set('mesa.cfg',S.cfg);renderCfg();$('#modal').classList.remove('open');
+  if(!S.cfg.url) return;
+  try{ await callN8n('perguntar',{pergunta:'ping',rows:[]},8000); setStatus('ok','n8n conectado'); toast('Conexão com o n8n funcionando.'); }
+  catch(e){ setStatus('bad','n8n sem resposta'); toast('Não consegui falar com o n8n: '+e.message,true); }
+};
+async function callN8n(path,body,timeout=90000){
+  if(!S.cfg.url) { $('#modal').classList.add('open'); throw new Error('configure a URL do n8n'); }
+  const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),timeout);
+  try{
+    const r=await fetch(`${S.cfg.url}/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl.signal});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const txt=await r.text(); let data; try{data=JSON.parse(txt)}catch{data={resposta:txt}}
+    if(Array.isArray(data)) data=data[0]||{};
+    if(typeof data.output==='string'){try{data=JSON.parse(data.output)}catch{data={resposta:data.output}}}
+    if(data.message&&data.message.content) data=typeof data.message.content==='string'?safeJson(data.message.content):data.message.content;
+    setStatus('ok','n8n conectado'); return data;
+  }catch(e){ if(e.name==='AbortError') throw new Error('tempo esgotado'); throw e; }
+  finally{clearTimeout(t)}
+}
+function safeJson(s){s=String(s).replace(/^```(?:json)?\s*|\s*```$/g,'').trim();try{return JSON.parse(s)}catch{ const m=s.match(/\{[\s\S]*\}/); if(m){try{return JSON.parse(m[0])}catch{}} return {resposta:s}; }}
+function busy(spinId,btnId,on){$(spinId).innerHTML=on?'<span class="spinner"></span>':'';$(btnId).disabled=on}
+
+// ---------- dados ----------
+const drop=$('#drop'),file=$('#file');
+drop.onclick=()=>file.click();
+['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',ev=>loadFile(ev.dataTransfer.files[0]));
+file.onchange=()=>loadFile(file.files[0]);
+async function loadFile(f){
+  if(!f) return;
+  try{
+    const buf=await f.arrayBuffer();
+    let rows;
+    if(/\.csv$/i.test(f.name)){ rows=parseCsv(new TextDecoder('utf-8').decode(buf)); }
+    else { if(!window.XLSX) throw new Error('biblioteca XLSX não carregou; use CSV'); const wb=XLSX.read(buf,{type:'array'}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}); }
+    setRows(rows,f.name);
+  }catch(e){toast('Não consegui ler o arquivo: '+e.message,true)}
+}
+function parseCsv(text){
+  const sep=(text.split('\n')[0].match(/;/g)||[]).length>(text.split('\n')[0].match(/,/g)||[]).length?';':',';
+  const lines=[];let cur='',q=false,row=[];
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else if(c==='"') q=true; else if(c===sep){row.push(cur);cur='';}
+    else if(c==='\n'){row.push(cur);lines.push(row);row=[];cur='';}
+    else if(c!=='\r') cur+=c; }
+  if(cur||row.length){row.push(cur);lines.push(row)}
+  const h=lines.shift().map(x=>x.trim()); return lines.filter(r=>r.some(x=>x.trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]||'').trim()])));
+}
+function setRows(rows,name){
+  S.rows=rows;S.analise=null;
+  $('#rowsHint').textContent=`${rows.length} linhas · ${Object.keys(rows[0]||{}).length} colunas · ${name}`;
+  $('#btnAnalisar').disabled=!rows.length;
+  renderTable(rows.map(r=>({...r})),Object.keys(rows[0]||{}));
+  $('#resumo').className='empty';$('#resumo').textContent='Dados carregados. Clique em Analisar.';
+  $('#kpis').style.display='none';$('#chartbox').style.display='none';$('#alertas').innerHTML='';
+}
+function renderTable(rows,cols){
+  const th=$('#tabela thead'),tb=$('#tabela tbody');
+  th.innerHTML='<tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr>';
+  tb.innerHTML=rows.map(r=>'<tr>'+cols.map(c=>`<td>${r[c]??''}</td>`).join('')+'</tr>').join('');
+}
+$('#btnSample').onclick=()=>setRows(SAMPLE,'relatos-sac-exemplo (fictício)');
+
+// ---------- análise ----------
+$('#btnAnalisar').onclick=async()=>{
+  busy('#anSpin','#btnAnalisar',true);
+  try{
+    const data=await callN8n('analisar',{rows:S.rows,instrucoes:$('#instrucoes').value.trim()});
+    S.analise=data; renderAnalise(data); toast('Análise concluída. Agora confira os trechos.');
+  }catch(e){toast('Falha na análise: '+e.message,true)}
+  finally{busy('#anSpin','#btnAnalisar',false)}
+};
+const tagClass=c=>{c=(c||'').toLowerCase(); if(c.includes('adverso'))return 'ea'; if(c.includes('técnica')||c.includes('tecnica'))return 'qt'; if(c.includes('informa'))return 'pi'; return 'ou';};
+function renderAnalise(d){
+  const itens=d.itens||[];
+  const count=k=>itens.filter(i=>tagClass(i.classificacao)===k).length;
+  $('#resumo').className='answer md-out';$('#resumo').innerHTML=md(typeof d.resumo==='object'?JSON.stringify(d.resumo):(d.resumo||'Sem resumo retornado.'));
+  $('#kpis').style.display='';$('#kEA').textContent=count('ea');$('#kQT').textContent=count('qt');$('#kPI').textContent=count('pi');
+  $('#kGR').textContent=itens.filter(i=>/grave/i.test(i.gravidade||'')).length;
+  const al=(d.alertas||[]); $('#alertas').innerHTML=al.length?`<div class="alert"><b>Pontos de atenção</b><ul style="margin:6px 0 0;padding-left:18px">${al.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`:'';
+  // chart
+  $('#chartbox').style.display='';
+  const cats={};itens.forEach(i=>{const k=i.classificacao||'outro';cats[k]=(cats[k]||0)+1});
+  if(S.chart)S.chart.destroy();
+  if(window.Chart){S.chart=new Chart($('#chart'),{type:'bar',data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['#ff5a47','#ffc857','#7aa2ff','#a8a3c7','#5ee6b8'],borderRadius:8}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#a8a3c7'},grid:{display:false}},y:{ticks:{color:'#a8a3c7',precision:0},grid:{color:'rgba(46,42,82,.6)'}}},maintainAspectRatio:false}});}
+  // table
+  const th=$('#tabela thead'),tb=$('#tabela tbody');
+  th.innerHTML='<tr><th>ID</th><th>Classificação</th><th>Gravidade</th><th>Motivo</th><th>Trecho citado</th><th>Alerta</th></tr>';
+  tb.innerHTML=itens.map(i=>`<tr><td><b>${esc(i.id)}</b></td><td><span class="tag ${tagClass(i.classificacao)}">${esc(i.classificacao)}</span></td><td>${/grave/i.test(i.gravidade||'')?'<span class="tag grave">GRAVE</span>':esc(i.gravidade||'')}</td><td>${esc(i.motivo||'')}</td><td class="quote">${esc(i.trecho||'')}</td><td>${esc(i.alerta||'')}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">O modelo não devolveu itens.</td></tr>';
+}
+
+
+// ---------- renderizador universal (texto, markdown ou JSON) ----------
+function md(src){
+  src=String(src??'').replace(/\r/g,'');
+  const lines=src.split('\n'); let html='',i=0;
+  const inline=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/(?<!\*)\*(?!\*)([^*]+)\*/g,'<i>$1</i>');
+  while(i<lines.length){
+    let l=lines[i];
+    if(/^```/.test(l)){let buf=[];i++;while(i<lines.length&&!/^```/.test(lines[i]))buf.push(lines[i++]);i++;html+=`<pre>${esc(buf.join('\n'))}</pre>`;continue;}
+    if(/^\s*\|.*\|\s*$/.test(l)){let rows=[];while(i<lines.length&&/^\s*\|.*\|\s*$/.test(lines[i])){rows.push(lines[i].trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));i++;}
+      rows=rows.filter(r=>!r.every(c=>/^:?-{2,}:?$/.test(c)));
+      if(rows.length){html+='<table><thead><tr>'+rows[0].map(c=>`<th>${inline(c)}</th>`).join('')+'</tr></thead><tbody>'+rows.slice(1).map(r=>'<tr>'+r.map(c=>`<td>${inline(c)}</td>`).join('')+'</tr>').join('')+'</tbody></table>';}
+      continue;}
+    const h=l.match(/^(#{1,6})\s+(.*)/); if(h){const n=Math.min(h[1].length,3);html+=`<h${n}>${inline(h[2])}</h${n}>`;i++;continue;}
+    if(/^\s*([-*•]|\d+[.)])\s+/.test(l)){const ord=/^\s*\d+[.)]/.test(l);let items=[];while(i<lines.length&&/^\s*([-*•]|\d+[.)])\s+/.test(lines[i])){items.push(lines[i].replace(/^\s*([-*•]|\d+[.)])\s+/,''));i++;}
+      html+=`<${ord?'ol':'ul'}>${items.map(x=>`<li>${inline(x)}</li>`).join('')}</${ord?'ol':'ul'}>`;continue;}
+    if(!l.trim()){i++;continue;}
+    let buf=[l];i++;while(i<lines.length&&lines[i].trim()&&!/^(#{1,6}\s|```|\s*\||\s*([-*•]|\d+[.)])\s)/.test(lines[i]))buf.push(lines[i++]);
+    html+=`<p>${inline(buf.join(' '))}</p>`;
+  }
+  return html;
+}
+const PALETTE=['#ff5a47','#ffc857','#7aa2ff','#5ee6b8','#a8a3c7','#ff8a5c','#c3d2ff'];
+const CHART_LABELS=['labels','rotulos','rótulos','categorias','eixo_x','x'], CHART_VALUES=['valores','values','data','dados','y','series'];
+const pick=(o,keys)=>{for(const k of keys){if(o&&o[k]!==undefined)return o[k];}return undefined;};
+function isChart(o){ if(!o||typeof o!=='object'||Array.isArray(o)) return false; const L=pick(o,CHART_LABELS),V=pick(o,CHART_VALUES); return Array.isArray(L)&&(Array.isArray(V)||(V&&typeof V==='object')); }
+function isTable(o){ return o&&typeof o==='object'&&!Array.isArray(o)&&Array.isArray(pick(o,['colunas','columns','cabecalho','header']))&&Array.isArray(pick(o,['linhas','rows','dados','data'])); }
+function chartCard(spec,title){
+  const id='c'+Math.random().toString(36).slice(2); const L=pick(spec,CHART_LABELS); let V=pick(spec,CHART_VALUES);
+  let datasets;
+  if(Array.isArray(V)&&V.length&&typeof V[0]==='object'&&!Array.isArray(V[0])) datasets=V.map((d,k)=>({label:d.nome||d.label||d.serie||`Série ${k+1}`,data:d.valores||d.values||d.data||[],backgroundColor:PALETTE[k%PALETTE.length],borderColor:PALETTE[k%PALETTE.length],borderRadius:6}));
+  else if(Array.isArray(V)) datasets=[{data:V.map(Number),backgroundColor:PALETTE,borderColor:PALETTE,borderRadius:6}];
+  else datasets=Object.entries(V).map(([k,v],i)=>({label:k,data:v,backgroundColor:PALETTE[i%PALETTE.length],borderColor:PALETTE[i%PALETTE.length],borderRadius:6}));
+  let type=(spec.tipo||spec.type||'bar').toLowerCase(); if(/pizza|pie/.test(type))type='doughnut'; else if(/linha|line/.test(type))type='line'; else if(/horizontal/.test(type))type='bar'; else if(!['bar','line','doughnut','pie','radar'].includes(type))type='bar';
+  const el=document.createElement('div');el.className='card';el.innerHTML=`<h5>${esc(spec.titulo||spec.title||title||'Gráfico')}</h5><div class="cb"><canvas id="${id}"></canvas></div>${spec.leitura||spec.comentario?`<div class="hint">${esc(spec.leitura||spec.comentario)}</div>`:''}`;
+  setTimeout(()=>{ if(!window.Chart) return; new Chart(document.getElementById(id),{type,data:{labels:L,datasets},options:{maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1||type==='doughnut',labels:{color:'#a8a3c7'}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#a8a3c7'},grid:{display:false}},y:{ticks:{color:'#a8a3c7'},grid:{color:'rgba(46,42,82,.6)'}}}}}); },0);
+  return el;
+}
+function tableCard(spec,title){
+  const cols=pick(spec,['colunas','columns','cabecalho','header']), rows=pick(spec,['linhas','rows','dados','data']);
+  const el=document.createElement('div');el.className='card';
+  el.innerHTML=`<h5>${esc(spec.titulo||spec.title||title||'Tabela')}</h5><div class="tbl" style="max-height:300px"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</thead><tbody>${rows.map(r=>'<tr>'+(Array.isArray(r)?r:cols.map(c=>r[c])).map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>').join('')}</tbody></table></div>`;
+  return el;
+}
+function objTable(arr){ const cols=[...new Set(arr.flatMap(o=>Object.keys(o)))]; return `<div class="tbl" style="max-height:300px"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${arr.map(o=>'<tr>'+cols.map(c=>`<td>${typeof o[c]==='object'?esc(JSON.stringify(o[c])):esc(o[c]??'')}</td>`).join('')+'</tr>').join('')}</tbody></table></div>`; }
+const LABEL={resposta:'Resposta',conta:'Conta',evidencias:'Evidências',suposicoes:'Suposições',faltante:'O que falta',confianca:'Confiança',resumo:'Resumo',alertas:'Pontos de atenção',recomendacoes:'Recomendações',recomendacao:'Recomendação',conclusao:'Conclusão',analise:'Análise',insights:'Insights',riscos:'Riscos',hipoteses:'Hipóteses'};
+const titleOf=k=>LABEL[k]||k.replace(/_/g,' ').replace(/^\w/,c=>c.toUpperCase());
+function renderAny(box,data,{raw=true}={}){
+  box.className='answer md-out'; box.innerHTML='';
+  if(data==null){box.innerHTML='<i>Sem resposta.</i>';return;}
+  if(typeof data==='string'){ const j=safeJson(data); if(j&&typeof j==='object'&&!(Object.keys(j).length===1&&typeof j.resposta==='string'&&j.resposta===data)) data=j; else { box.innerHTML=md(data); return; } }
+  if(typeof data!=='object'){box.textContent=String(data);return;}
+  const dash=document.createElement('div');dash.className='dash';
+  const main=document.createElement('div');
+  const order=['resposta','resumo','conclusao','analise'];
+  const keys=[...order.filter(k=>k in data),...Object.keys(data).filter(k=>!order.includes(k))];
+  for(const k of keys){
+    const v=data[k]; if(v==null||v==='') continue;
+    if(/^(graficos|charts|dashboard)$/i.test(k)&&Array.isArray(v)){ v.forEach(g=>{ if(isChart(g)) dash.appendChild(chartCard(g)); }); continue; }
+    if(/^(tabelas|tables)$/i.test(k)&&Array.isArray(v)){ v.forEach(t=>{ if(isTable(t)) dash.appendChild(tableCard(t)); }); continue; }
+    if(isChart(v)){ dash.appendChild(chartCard(v,titleOf(k))); continue; }
+    if(isTable(v)){ dash.appendChild(tableCard(v,titleOf(k))); continue; }
+    if(k==='confianca'){ main.insertAdjacentHTML('beforeend',`<div class="conf">Confiança: ${esc(typeof v==='object'?JSON.stringify(v):v)}</div>`); continue; }
+    const h=order.includes(k)&&k==='resposta'?'':`<h4>${esc(titleOf(k))}</h4>`;
+    if(typeof v==='string'||typeof v==='number'||typeof v==='boolean'){ main.insertAdjacentHTML('beforeend',h+(k==='conta'?`<div class="quote">${esc(v)}</div>`:md(String(v)))); }
+    else if(Array.isArray(v)){
+      if(!v.length) continue;
+      if(v.every(x=>typeof x!=='object')) main.insertAdjacentHTML('beforeend',h+`<ul>${v.map(x=>`<li>${md(String(x)).replace(/^<p>|<\/p>$/g,'')}</li>`).join('')}</ul>`);
+      else if(v.every(x=>isChart(x))) v.forEach(g=>dash.appendChild(chartCard(g,titleOf(k))));
+      else main.insertAdjacentHTML('beforeend',h+objTable(v));
+    } else { const sub=document.createElement('div'); main.insertAdjacentHTML('beforeend',h); renderAny(sub,v,{raw:false}); sub.className='md-out'; main.appendChild(sub); }
+  }
+  box.appendChild(main); if(dash.children.length) box.appendChild(dash);
+  if(raw) box.insertAdjacentHTML('beforeend',`<details class="raw"><summary>ver JSON bruto</summary><pre>${esc(JSON.stringify(data,null,2))}</pre></details>`);
+}
+
+// ---------- perguntas ----------
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{$('#pergunta').value=b.dataset.q});
+$('#btnPerguntar').onclick=async()=>{
+  const q=$('#pergunta').value.trim(); if(!q) return toast('Escreva a pergunta.',true);
+  busy('#pgSpin','#btnPerguntar',true);
+  try{ const d=await callN8n('perguntar',{pergunta:q,rows:S.rows,analise:S.analise}); renderResposta(d); }
+  catch(e){toast('Falha: '+e.message,true)} finally{busy('#pgSpin','#btnPerguntar',false)}
+};
+function renderResposta(d){ renderAny($('#resposta'),d); }
+
+// ---------- agentes ----------
+const F=['agNome','agPapel','agObjetivo','agFontes','agLimites','agFormato','agAprovacao'];
+function buildMd(){
+  const v=Object.fromEntries(F.map(k=>[k,$('#'+k).value.trim()]));
+  if(!v.agNome) return null;
+  return `# ${v.agNome}
+
+## Papel
+${v.agPapel||'(definir)'}
+
+## Objetivo
+${v.agObjetivo||'(definir)'}
+
+## Fontes autorizadas
+${v.agFontes||'Apenas os documentos anexados. Quando a informação não estiver neles, escrever NÃO LOCALIZADO.'}
+
+## O que não fazer
+${v.agLimites||'(definir)'}
+
+## Formato de saída
+${v.agFormato||'(definir)'}
+
+## Ponto de aprovação humana
+${v.agAprovacao||'(definir)'}
+
+## Regra de verificação
+Cada afirmação aponta o trecho de origem. O que for suposição recebe o rótulo HIPÓTESE. Nada sai sem a revisão indicada acima.
+`;
+}
+$('#btnGerar').onclick=()=>{const md=buildMd(); if(!md) return toast('Dê um nome ao agente.',true); $('#mdPreview').textContent=md;};
+$('#btnBaixar').onclick=()=>{const md=buildMd(); if(!md) return toast('Dê um nome ao agente.',true); const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown'}));a.download=slug($('#agNome').value)+'.md';a.click();};
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'agente';
+function loadAgents(){const list=ls.get('mesa.agentes',[]);const el=$('#agentList');
+  el.innerHTML=list.length?list.map((a,i)=>`<div class="agent" data-i="${i}"><div><b>${esc(a.nome)}</b><br><small>${esc(a.papel||'')}</small></div><small>${new Date(a.quando).toLocaleDateString('pt-BR')}</small></div>`).join(''):'<div class="hint">Nenhum agente salvo ainda.</div>';
+  el.querySelectorAll('.agent').forEach(x=>x.onclick=()=>{const a=list[+x.dataset.i];F.forEach(k=>$('#'+k).value=a.campos[k]||'');$('#mdPreview').textContent=a.md;});
+}
+$('#btnSalvar').onclick=()=>{const md=buildMd(); if(!md) return toast('Dê um nome ao agente.',true);
+  const list=ls.get('mesa.agentes',[]); const campos=Object.fromEntries(F.map(k=>[k,$('#'+k).value]));
+  const idx=list.findIndex(a=>a.nome===campos.agNome); const rec={nome:campos.agNome,papel:campos.agPapel,campos,md,quando:Date.now()};
+  if(idx>=0)list[idx]=rec; else list.unshift(rec); ls.set('mesa.agentes',list); $('#mdPreview').textContent=md; loadAgents(); toast('Agente salvo nesta mesa.');};
+$('#btnTestar').onclick=async()=>{
+  const md=buildMd()||$('#mdPreview').textContent; const msg=$('#agMsg').value.trim();
+  if(!md||md.startsWith('# Preencha')) return toast('Gere o .md antes de testar.',true); if(!msg) return toast('Escreva a mensagem de teste.',true);
+  busy('#agSpin','#btnTestar',true);
+  try{ const d=await callN8n('agente',{agente_md:md,mensagem:msg,rows:S.rows}); const box=$('#agResposta');box.style.display='';renderAny(box,d); }
+  catch(e){toast('Falha: '+e.message,true)} finally{busy('#agSpin','#btnTestar',false)}
+};
+loadAgents();
+
+// ---------- amostra fictícia ----------
+const SAMPLE=[
+["SAC-001","Telefone","Paciente","Cardiolex 25 mg","L24A17","02/10/2026","Comecei a tomar há 3 dias e estou com tontura forte ao levantar. Parei por conta própria."],
+["SAC-002","E-mail","Farmácia","Gastrovit 40 mg","L24B03","02/10/2026","Cliente devolveu caixa com blister rasgado e dois comprimidos faltando. Lote L24B03."],
+["SAC-003","WhatsApp","Paciente","Dermacalm creme","L23K91","03/10/2026","Posso usar o creme na pálpebra? A bula não deixa claro."],
+["SAC-004","Telefone","Familiar","Cardiolex 25 mg","L24A17","03/10/2026","Minha mãe tomou o comprimido partido ao meio, como dá para partir? Ela foi internada na UTI ontem com pressão muito baixa."],
+["SAC-005","E-mail","Médico","Respiran xarope","L24C22","04/10/2026","Dois pacientes relataram gosto metálico e o xarope estava com cor mais escura que o habitual. Lote L24C22."],
+["SAC-006","Telefone","Paciente","Gastrovit 40 mg","L24B03","04/10/2026","Quero saber se posso tomar junto com omeprazol de outra marca."],
+["SAC-007","WhatsApp","Paciente","Neurolax 10 mg","L24D05","05/10/2026","Senti sonolência o dia inteiro e dor de cabeça. Tomo há uma semana."],
+["SAC-008","Telefone","Paciente","não informado","não informado","05/10/2026","A caixinha azul para pressão me deu enjoo. Não lembro o nome, é a azul."],
+["SAC-009","E-mail","Paciente","Cardiolex 25 mg","L24A20","06/10/2026","Meu nome é Carla Mendes, CPF 123.456.789-00, telefone 11 99999-0000, moro na Rua das Flores 10. Tive coceira no corpo todo depois da segunda dose."],
+["SAC-010","Telefone","Farmácia","Dermacalm creme","L23K91","06/10/2026","Bisnaga chegou com vazamento na caixa. Três unidades do mesmo lote."],
+["SAC-011","WhatsApp","Paciente","Neurolax 10 mg","L24D05","07/10/2026","Meu lábio inchou muito uma hora depois de tomar. Já passou, mas assustou."],
+["SAC-012","E-mail","Paciente","Respiran xarope","L24C22","07/10/2026","Qual a dose para criança de 6 anos com 20 kg?"],
+["SAC-013","Telefone","Familiar","Neurolax 10 mg","L24D08","08/10/2026","Meu pai tomou 4 comprimidos de uma vez por engano e foi internado em observação na UTI por 24 horas."],
+["SAC-014","WhatsApp","Paciente","Respiran xarope","L24C22","08/10/2026","O xarope está com cheiro estranho e mais escuro. Posso usar?"],
+["SAC-015","Telefone","Paciente","Gastrovit 40 mg","L24B11","09/10/2026","Tomo há 15 dias e a azia continua igual. Não fez efeito nenhum."],
+["SAC-016","E-mail","Farmácia","Cardiolex 25 mg","L24A17","09/10/2026","Cliente informou que os comprimidos estão esfarelando ao retirar do blister."],
+["SAC-017","Telefone","Paciente","Dermacalm creme","L23K95","10/10/2026","Vocês têm programa de desconto para esse creme?"],
+["SAC-018","Telefone","Familiar","Cardiolex 25 mg","L24A17","10/10/2026","Ligando de novo sobre minha mãe, a da UTI. Ela recebeu alta hoje, o médico disse que foi queda de pressão pelo remédio."],
+["SAC-019","WhatsApp","Paciente","Neurolax 10 mg","L24D05","11/10/2026","Descobri que estou grávida de 8 semanas e tomei Neurolax o mês todo. E agora?"],
+["SAC-020","E-mail","Médico","Gastrovit 40 mg","L24B03","11/10/2026","Paciente relatou dois comprimidos a menos na cartela e um deles com coloração diferente."],
+["SAC-021","Telefone","Paciente","Respiran xarope","L24C30","12/10/2026","Onde encontro a bula completa em PDF?"],
+["SAC-022","WhatsApp","Paciente","Cardiolex 25 mg","desconhecido","12/10/2026","Comprei pela internet mais barato, o comprimido veio de outra cor e passei mal, vomitei a tarde toda."],
+["SAC-023","Telefone","Paciente","Dermacalm creme","L23K91","13/10/2026","Ardeu muito na aplicação e ficou vermelho por duas horas."],
+["SAC-024","E-mail","Familiar","Gastrovit 40 mg","L24B11","13/10/2026","Minha filha de 4 anos achou a cartela e tomou 3 comprimidos. Levei ao pronto-socorro, está bem."],
+["SAC-025","Telefone","Paciente","Neurolax 10 mg","L24D08","14/10/2026","Posso beber vinho no fim de semana tomando esse remédio?"],
+["SAC-026","WhatsApp","Paciente","Cardiolex 25 mg","L24A20","14/10/2026","Oi, sou a Carla, mandei e-mail semana passada sobre a coceira. Ninguém respondeu. Continua."],
+["SAC-027","Telefone","Farmácia","Respiran xarope","L24C22","15/10/2026","Mais um cliente devolveu o xarope escuro. Já são quatro do mesmo lote."],
+["SAC-028","E-mail","Paciente","Gastrovit 40 mg","L24B03","15/10/2026","Parabéns pelo atendimento, resolveram minha dúvida rápido."],
+["SAC-029","Telefone","Paciente","Dermacalm creme","L23K95","16/10/2026","Usei por 10 dias e a mancha não melhorou nada. É normal?"],
+["SAC-030","WhatsApp","Familiar","Neurolax 10 mg","L24D05","16/10/2026","Meu irmão teve uma convulsão duas horas depois de tomar. Ele nunca teve isso. Está no hospital."]
+].map(r=>({ID:r[0],Canal:r[1],Relator:r[2],Produto:r[3],Lote:r[4],Data:r[5],Relato:r[6]}));
+</script>
+</body>
+</html>

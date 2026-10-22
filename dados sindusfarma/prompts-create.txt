@@ -1,0 +1,210 @@
+CASOS EXTRAS PARA A DEMONSTRAÇÃO CREATE · SINDUSFARMA 20/10/2026
+================================================================
+
+Sete casos fictícios para praticar, no mesmo formato da demonstração com os trinta relatos do SAC. Cada caso traz o arquivo que vai anexado à ferramenta e o prompt CREATE pronto para colar. Produtos, lotes, pessoas, distribuidores e números são inventados e reaproveitam os produtos da planilha relatos-sac-ficticios.xlsx (Dorvalix, Pressaneo, Glicontra, Respiflux, Dermaquil, Alergim e Vitanov), de modo que os casos se cruzam entre si.
+
+Os CSVs usam ponto e vírgula como separador e UTF-8 com BOM, o que faz o Excel em português abrir as colunas e os acentos corretamente. As ferramentas de IA leem o formato sem ajuste.
+
+  Arquivo · Elo da cadeia · Bloco do deck · Tempo de demonstração
+  01-relatos-sac-segunda-quinzena.csv · Farmacovigilância · Bloco 2, continuação da demonstração · 8 min
+  02-demanda-estoque-distribuidores.csv · Cadeia de suprimentos · Bloco 1, preditiva e generativa · 8 min
+  03-desvios-de-qualidade.csv · Manufatura e qualidade · Bloco 2, harness e cruzamento de fontes · 8 min
+  04-bula-pressaneo-duas-versoes.csv · Assuntos regulatórios · Bloco 2, exemplo da bula · 5 min
+  05-perguntas-informacao-medica.csv · Informação médica · Bloco 3, alucinação · 6 min
+  06-alegacoes-material-promocional.csv e 06b-referencias-disponiveis.csv · Comercial · Bloco 3, propriedade intelectual e propaganda · 6 min
+  07-pedidos-de-uso-de-ia.csv · Governança · Bloco 3, antes da Prática 3 · 5 min
+
+Uma variação útil em qualquer caso consiste em rodar o mesmo prompt sem a linha [A] e comparar as duas respostas, porque a diferença mostra o que a restrição às fontes e o "não localizado" efetivamente evitam.
+
+Caso 1 · Segunda quinzena do SAC
+--------------------------------
+
+Vinte relatos novos (SAC-031 a SAC-050), recebidos entre 13 e 20/10. O caso funciona sozinho, mas rende mais quando anexado junto com a planilha da demonstração, porque vários relatos são seguimento de casos anteriores ou repetem lotes já citados.
+
+Anexar: 01-relatos-sac-segunda-quinzena.csv (e, opcionalmente, relatos-sac-ficticios.xlsx).
+
+[C] Atue como analista de farmacovigilância de uma
+indústria farmacêutica brasileira.
+[R] Classifique cada relato do arquivo anexado como
+evento adverso, queixa técnica, evento adverso com
+queixa técnica, pedido de informação ou outro, e
+indique os eventos adversos graves e as situações
+especiais (gestação, superdose, falta de eficácia).
+[E] Exemplo de linha: "SAC-045 | evento adverso |
+grave | internação por cinco dias | 'ficou cinco dias
+internada'".
+[A] Use apenas os arquivos anexados. Copie o trecho que
+justifica cada classificação. Se o produto ou o lote
+não estiver identificado, escreva "não localizado".
+Não avalie causalidade.
+[T] Tabela com ID, classificação, gravidade, situação
+especial, motivo e trecho. Depois, uma lista de relatos
+agrupados por lote e uma lista de seguimentos de casos
+anteriores.
+[E] Aponte relatos com dados pessoais que não deveriam
+estar no arquivo e relatos que exigem retorno urgente
+ao paciente.
+
+Caso 2 · Demanda e estoque nos distribuidores
+---------------------------------------------
+
+Doze semanas (27/07 a 12/10) de vendas, estoque final e reposição de quatro apresentações em cinco distribuidores, 240 linhas. O caso mostra uma IA generativa fazendo um cálculo simples sobre dados tabulares e serve para discutir a diferença entre esse uso e um modelo preditivo de demanda.
+
+Anexar: 02-demanda-estoque-distribuidores.csv.
+
+[C] Atue como analista de planejamento de demanda de
+uma indústria farmacêutica brasileira.
+[R] Identifique as combinações de distribuidor e
+apresentação com risco de ruptura, calculando a
+cobertura de estoque da última semana como estoque
+final dividido pela média de unidades vendidas nas
+quatro últimas semanas, e compare com o lead time.
+[E] Exemplo de linha: "Distribuidor X | Produto Y |
+estoque 900 | média 300 | cobertura 3,0 semanas |
+lead time 4 | risco".
+[A] Antes do cálculo, liste os problemas de qualidade
+dos dados que encontrar (linhas duplicadas, semanas
+faltantes, valores impossíveis) e diga como os tratou.
+Use apenas o arquivo. Mostre a conta de cada linha.
+Não projete demanda futura além do cálculo pedido.
+[T] Uma lista dos problemas de dados e uma tabela com
+as combinações em risco, ordenada pela cobertura.
+[E] Ao final, indique as combinações em que a média de
+vendas pode não representar a demanda real e explique
+por quê.
+
+Caso 3 · Desvios de qualidade cruzados com o SAC
+------------------------------------------------
+
+Dezesseis desvios registrados entre 22/09 e 14/10, com área, equipamento, produto, lote, classificação inicial e status. O caso mostra o harness em ação, porque o valor aparece quando a ferramenta recebe duas fontes e cruza as duas.
+
+Anexar: 03-desvios-de-qualidade.csv, relatos-sac-ficticios.xlsx e 01-relatos-sac-segunda-quinzena.csv.
+
+[C] Atue como analista de garantia da qualidade de uma
+fábrica farmacêutica brasileira, sob as boas práticas
+de fabricação.
+[R] Agrupe os desvios por equipamento e por lote,
+aponte recorrências e relacione cada lote com desvio
+aos relatos do SAC do mesmo lote.
+[E] Exemplo de linha: "L26B114 | DSV-2026-101 |
+SAC-001 | alvéolos vazios no desvio e na reclamação |
+relação provável".
+[A] Use apenas os arquivos anexados. Trate toda relação
+como hipótese a investigar, e não como causa raiz.
+Escreva "sem relato correspondente" quando o lote não
+aparecer no SAC. Não reclassifique desvios; indique
+apenas os que parecem subclassificados e o motivo.
+[T] Uma tabela de recorrência por equipamento, uma
+tabela lote, desvio e relatos, e uma lista curta de
+desvios que parecem subclassificados.
+[E] Indique dados pessoais desnecessários nos registros
+e os desvios fechados que deveriam ser reabertos.
+
+Caso 4 · Duas versões da bula do Pressaneo
+------------------------------------------
+
+Onze seções da bula fictícia em duas versões, 03/2024 e 09/2026, com a página de cada uma. É o exemplo do slide de bula, agora com o arquivo para rodar.
+
+Anexar: 04-bula-pressaneo-duas-versoes.csv.
+
+[C] Atue como analista de assuntos regulatórios de uma
+indústria farmacêutica brasileira.
+[R] Compare as duas versões da bula e liste todas as
+alterações, seção por seção.
+[E] Exemplo de linha: "Interações | diuréticos
+poupadores de potássio | inclui lítio | nova interação |
+p. 4 → p. 4".
+[A] Use apenas o arquivo. Mudança só de página não é
+alteração de conteúdo. Quando uma seção não existir em
+uma das versões, escreva "seção ausente". Não faça
+interpretação clínica.
+[T] Tabela com seção, texto anterior, texto novo,
+natureza da alteração (segurança, posologia,
+administrativa, editorial) e páginas.
+[E] Ao final, liste as alterações que exigem
+comunicação à força de vendas e aos profissionais de
+saúde, para a área médica decidir.
+
+Caso 5 · Perguntas de informação médica
+---------------------------------------
+
+Dez perguntas de médicos sobre o Pressaneo, a serem respondidas apenas com a bula. É a versão segura da iniciativa E da Prática 1, com fonte restrita e revisão.
+
+Anexar: 05-perguntas-informacao-medica.csv e 04-bula-pressaneo-duas-versoes.csv.
+
+[C] Atue como analista de informação médica de uma
+indústria farmacêutica brasileira, preparando
+rascunhos para revisão da área médica.
+[R] Redija um rascunho de resposta para cada pergunta,
+usando exclusivamente a versão 09/2026 da bula.
+[E] Exemplo de linha: "IM-205 | sim, há interação |
+'O uso com lítio pode aumentar a concentração sérica
+de lítio' | seção 5, p. 4 | sem encaminhamento".
+[A] Cite o trecho e a seção que sustentam cada
+resposta. Quando a bula não responder, escreva "não
+localizado na bula" e não complete com conhecimento
+próprio. Não faça recomendação clínica individual nem
+compare com outros medicamentos.
+[T] Tabela com ID, rascunho de resposta, trecho, seção
+e encaminhamento (área médica, farmacovigilância ou
+nenhum).
+[E] Sinalize as perguntas que contêm relato de evento
+adverso ou de exposição na gestação, que precisam ir à
+farmacovigilância.
+
+Caso 6 · Alegações de material promocional
+------------------------------------------
+
+Dez alegações de peças promocionais do Pressaneo e a lista das referências que a empresa de fato tem. O caso testa se a ferramenta confere a alegação contra a fonte ou apenas aceita a referência citada.
+
+Anexar: 06-alegacoes-material-promocional.csv, 06b-referencias-disponiveis.csv e 04-bula-pressaneo-duas-versoes.csv.
+
+[C] Atue como revisor de material promocional da área
+médica de uma indústria farmacêutica brasileira.
+[R] Avalie cada alegação contra a bula versão 09/2026
+e contra a lista de referências disponíveis, e indique
+se ela está sustentada, parcialmente sustentada ou sem
+sustentação.
+[E] Exemplo de linha: "ALG-01 | sustentada | 'redução
+média de 12 mmHg' | bula, seção 2 | nenhum ajuste".
+[A] Use apenas os arquivos anexados. Se a referência
+citada não estiver na lista de referências, escreva
+"referência não disponível" e não descreva o que ela
+diria. Sinalize superlativos, termos absolutos e
+indicações que não constam da bula. Não emita parecer
+jurídico.
+[T] Tabela com ID, avaliação, trecho da fonte, fonte,
+problema encontrado e sugestão de redação.
+[E] Ao final, indique as peças dirigidas ao público
+leigo, para a área jurídica avaliar se são permitidas
+para este medicamento.
+
+Caso 7 · Pedidos de uso de IA para o semáforo
+---------------------------------------------
+
+Dez pedidos de áreas da empresa para usar uma ferramenta de IA. Serve de aquecimento para a Prática 3, ou de contraprova depois dela, porque a ferramenta aplica a política escrita e a turma confere se a política estava clara.
+
+Anexar: 07-pedidos-de-uso-de-ia.csv.
+
+[C] Atue como analista de governança de dados de uma
+indústria farmacêutica brasileira.
+[R] Classifique cada pedido como verde (permitido),
+amarelo (permitido sob condições, que devem ser
+escritas) ou vermelho (proibido), aplicando a política
+abaixo.
+Política: não entram em ferramenta de IA dados de
+paciente, de participante de estudo clínico ou de
+colaborador; fórmula, processo, dossiê ou estratégia
+não publicados; contrato, preço ou condição comercial.
+Podem entrar, com a ferramenta corporativa aprovada,
+casos fictícios, documentos públicos e rascunhos sem
+dado pessoal nem informação reservada.
+[E] Exemplo de linha: "PED-03 | verde | documento
+público em ferramenta aprovada | nenhuma condição".
+[A] Use apenas a política e o arquivo. Quando a
+política não decidir o caso, escreva "política omissa"
+e explique a lacuna, em vez de escolher uma cor.
+[T] Tabela com ID, cor, regra aplicada e condições.
+[E] Ao final, sugira até três frases para acrescentar
+à política, a partir dos casos omissos.
+

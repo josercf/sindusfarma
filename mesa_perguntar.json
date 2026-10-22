@@ -1,0 +1,138 @@
+{
+  "name": "Mesa · perguntar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "perguntar",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "5a2fabeb-855a-4b81-91f5-fb557299792e",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "7cf445bf-25e3-4fa8-8045-9c84a7677e41"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || {};\nconst rows = Array.isArray(b.rows) ? b.rows : [];\nconst linhas = rows.map((r,i)=>Object.entries(r).map(([k,v])=>`${k}: ${v}`).join(' | ')).join('\\n');\nreturn [{ json: { ...b, rows, n: rows.length, linhas, analise_txt: b.analise ? JSON.stringify(b.analise) : '' } }];"
+      },
+      "id": "fc62e18b-3bb1-4fbb-aef5-c45eb3c6adac",
+      "name": "Normalizar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é um analista sênior que responde perguntas de executivos sobre uma base de relatos do SAC de uma indústria farmacêutica.\nRegras: use apenas os dados fornecidos; mostre a conta quando houver número; separe o que é evidência (com o ID do relato) do que é suposição; diga o que falta para responder melhor; não avalie causalidade clínica.\nResponda SOMENTE em JSON: {\"resposta\": \"texto direto em markdown, até 10 linhas\", \"conta\": \"a conta feita, se houver\", \"evidencias\": [\"ID: trecho\"], \"suposicoes\": [\"...\"], \"faltante\": [\"...\"], \"graficos\": [{\"titulo\": \"\", \"tipo\": \"bar | line | pie\", \"labels\": [], \"valores\": [], \"leitura\": \"\"}], \"confianca\": \"alta | média | baixa, com o motivo\"}\nInclua um gráfico só quando a pergunta envolver comparação ou distribuição, com números calculados dos dados.",
+              "role": "system"
+            },
+            {
+              "content": "=Pergunta: {{ $json.pergunta }}\n\nAnálise prévia (pode estar vazia): {{ $json.analise_txt }}\n\nDados ({{ $json.n }} linhas):\n{{ $json.linhas }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "c02b6539-68a4-4f52-8542-7bdaf8bea24a",
+      "name": "Modelo",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        480,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "SUBSTITUA",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.message.content) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "08c03229-0556-4e94-b77f-5d1b19b6d195",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar": {
+      "main": [
+        [
+          {
+            "node": "Modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

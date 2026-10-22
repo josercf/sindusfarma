@@ -1,0 +1,11 @@
+﻿ID;Área;Ferramenta pretendida;Uso proposto;Tipo de dado envolvido
+PED-01;Marketing;Ferramenta pública gratuita;Gerar ideias de título para um post sobre hidratação no verão.;Nenhum dado interno
+PED-02;Farmacovigilância;Ferramenta pública gratuita;Resumir a planilha de relatos do SAC da semana.;Relatos com nome, CPF e dado de saúde
+PED-03;Assuntos regulatórios;Ferramenta corporativa aprovada;Comparar duas versões publicadas de bula.;Documento público
+PED-04;P&D;Ferramenta corporativa aprovada;Revisar a fórmula de um produto em desenvolvimento para sugerir excipientes.;Fórmula não publicada
+PED-05;Comercial;Ferramenta corporativa aprovada;Redigir e-mail de negociação com uma rede de farmácias, incluindo a tabela de descontos.;Condição comercial de cliente
+PED-06;RH;Ferramenta pública gratuita;Classificar currículos recebidos para a vaga de analista.;Dado pessoal de candidatos
+PED-07;Qualidade;Ferramenta corporativa aprovada;Rascunhar um procedimento operacional a partir de um modelo interno sem dado de lote.;Documento interno sem dado pessoal
+PED-08;Informação médica;Chatbot no site, sem revisão;Responder diretamente a médicos sobre posologia e interações.;Bula aprovada
+PED-09;TI;Ferramenta pública gratuita;Corrigir um erro em um script do sistema de controle de lotes, colando o código.;Código-fonte interno
+PED-10;Treinamento;Ferramenta corporativa aprovada;Criar um quiz para o treinamento de boas práticas de fabricação a partir da norma publicada.;Norma pública
