@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=JSON.parse(localStorage.getItem("mesa.theme"));if(!t)t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <title>Mesa de Análise</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,14 +13,22 @@
 :root{
   --bg:#0b0a16; --bg2:#14122a; --panel:#1a1733; --panel2:#221e40; --line:#2e2a52;
   --text:#f2f0fa; --muted:#a8a3c7; --coral:#ff5a47; --coral2:#ff8a5c; --mint:#5ee6b8; --amber:#ffc857; --red:#ff5a47; --blue:#7aa2ff;
-  --radius:16px; --shadow:0 20px 60px rgba(0,0,0,.45);
+  --radius:16px; --shadow:0 20px 60px rgba(0,0,0,.45); --glow-a:rgba(255,90,71,.22); --glow-b:rgba(122,162,255,.16); --glow-c:rgba(94,230,184,.10);
+  --code-bg:#0a0914; --code-text:#d9d6ea; --accent-text:#ff8a5c; --tag-ea:#ffb3aa; --chip:rgba(255,255,255,.06); --tick:#a8a3c7; --gridline:rgba(46,42,82,.6);
+}
+:root[data-theme="light"]{
+  --bg:#f6f5fb; --bg2:#ffffff; --panel:#ffffff; --panel2:#f1effa; --line:#e1ddf0;
+  --text:#1a1733; --muted:#5e5a7a; --coral:#ff5a47; --coral2:#ff7a45; --mint:#0b7a5a; --amber:#8a5a00; --red:#c42a1c; --blue:#3b63d6;
+  --shadow:0 14px 40px rgba(26,23,51,.08); --glow-a:rgba(255,90,71,.14); --glow-b:rgba(122,162,255,.14); --glow-c:rgba(94,230,184,.12);
+  --code-bg:#1a1733; --code-text:#e9e6f5; --accent-text:#c2410c; --tag-ea:#c42a1c; --chip:rgba(26,23,51,.06); --tick:#5e5a7a; --gridline:rgba(26,23,51,.08);
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:
-  radial-gradient(900px 500px at 10% -10%, rgba(255,90,71,.22), transparent 60%),
-  radial-gradient(800px 500px at 100% 0%, rgba(122,162,255,.16), transparent 60%),
-  radial-gradient(700px 500px at 50% 110%, rgba(94,230,184,.10), transparent 60%);}
+  radial-gradient(900px 500px at 10% -10%, var(--glow-a), transparent 60%),
+  radial-gradient(800px 500px at 100% 0%, var(--glow-b), transparent 60%),
+  radial-gradient(700px 500px at 50% 110%, var(--glow-c), transparent 60%);}
+html,body,.card,.kpi,nav,.status,textarea,input,.answer,pre.md,.agent{transition:background-color .25s,border-color .25s,color .25s}
 a{color:inherit}
 .wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
 header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
@@ -39,8 +48,9 @@ nav button:not(.active):hover{color:var(--text);background:var(--panel2)}
 .grid{display:grid;gap:18px}
 .g2{grid-template-columns:1.1fr .9fr}.g3{grid-template-columns:repeat(3,1fr)}
 @media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+@media(max-width:640px){header{flex-wrap:wrap}header>.row{width:100%}header .status{min-width:0;max-width:100%}#statusTxt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
-.card h2{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--coral2)}
+.card h2{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text)}
 .card h3{margin:0 0 14px;font-size:20px;letter-spacing:-.01em}
 .card p.sub{margin:-6px 0 16px;color:var(--muted);font-size:14px}
 .drop{border:1.5px dashed var(--line);border-radius:14px;padding:26px;text-align:center;color:var(--muted);transition:.2s;cursor:pointer}
@@ -57,14 +67,14 @@ nav button:not(.active):hover{color:var(--text);background:var(--panel2)}
 .kpi{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px}
 .kpi .n{font-size:28px;font-weight:800;letter-spacing:-.03em}
 .kpi .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
-.kpi.coral .n{color:var(--coral)}.kpi.mint .n{color:var(--mint)}.kpi.amber .n{color:var(--amber)}.kpi.blue .n{color:var(--blue)}
+.kpi.coral .n{color:var(--accent-text)}.kpi.mint .n{color:var(--mint)}.kpi.amber .n{color:var(--amber)}.kpi.blue .n{color:var(--blue)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:10px 8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
-td{padding:10px 8px;border-bottom:1px solid rgba(46,42,82,.6);vertical-align:top}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .tbl{max-height:420px;overflow:auto;border-radius:12px;border:1px solid var(--line)}
 .tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.03em}
-.tag.ea{background:rgba(255,90,71,.18);color:#ffb3aa}.tag.qt{background:rgba(255,200,87,.18);color:#ffe2a0}
-.tag.pi{background:rgba(122,162,255,.18);color:#c3d2ff}.tag.ou{background:rgba(168,163,199,.18);color:#d9d6ea}
+.tag.ea{background:rgba(255,90,71,.18);color:var(--tag-ea)}.tag.qt{background:rgba(255,200,87,.22);color:var(--amber)}
+.tag.pi{background:rgba(122,162,255,.18);color:var(--blue)}.tag.ou{background:var(--chip);color:var(--muted)}
 .tag.grave{background:var(--coral);color:#1a0b08}
 .quote{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);border-left:2px solid var(--coral);padding-left:8px}
 textarea,input,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font:14px Inter;outline:none;transition:.2s}
@@ -72,21 +82,21 @@ textarea:focus,input:focus,select:focus{border-color:var(--coral)}
 textarea{min-height:90px;resize:vertical}
 label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 6px}
 .answer{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px;white-space:pre-wrap;line-height:1.55;font-size:14px}
-.answer h4{margin:14px 0 6px;font-size:12px;color:var(--coral2);text-transform:uppercase;letter-spacing:.08em}
+.answer h4{margin:14px 0 6px;font-size:12px;color:var(--accent-text);text-transform:uppercase;letter-spacing:.08em}
 .answer ul{margin:0;padding-left:18px}
-.conf{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:rgba(94,230,184,.14);color:var(--mint);font-weight:700;font-size:12px}
-pre.md{background:#0a0914;border:1px solid var(--line);border-radius:14px;padding:16px;font:12.5px/1.6 "JetBrains Mono",monospace;color:#d9d6ea;white-space:pre-wrap;max-height:520px;overflow:auto;margin:0}
+.conf{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:rgba(94,230,184,.16);color:var(--mint);font-weight:700;font-size:12px}
+pre.md{background:var(--code-bg);border:1px solid var(--line);border-radius:14px;padding:16px;font:12.5px/1.6 "JetBrains Mono",monospace;color:var(--code-text);white-space:pre-wrap;max-height:520px;overflow:auto;margin:0}
 .agents{display:flex;flex-direction:column;gap:8px}
 .agent{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer}
 .agent:hover{border-color:var(--coral)}
 .agent small{color:var(--muted)}
 .spinner{width:16px;height:16px;border:2px solid rgba(26,11,8,.3);border-top-color:#1a0b08;border-radius:50%;animation:spin .8s linear infinite}
-.ghost .spinner{border-color:rgba(255,255,255,.2);border-top-color:#fff}
+.ghost .spinner{border-color:var(--line);border-top-color:var(--text)}
 @keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2a2550;border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s}
 .toast.show{opacity:1}
 .toast.err{border-color:var(--coral)}
-.modal{position:fixed;inset:0;background:rgba(5,4,12,.7);display:none;place-items:center;z-index:50}
+.modal{position:fixed;inset:0;background:rgba(5,4,12,.55);display:none;place-items:center;z-index:50}
 .modal.open{display:grid}
 .modal .card{width:min(560px,92vw)}
 .hint{font-size:12px;color:var(--muted);margin-top:8px}
@@ -95,12 +105,12 @@ pre.md{background:#0a0914;border:1px solid var(--line);border-radius:14px;paddin
 .alert{background:rgba(255,200,87,.1);border:1px solid rgba(255,200,87,.35);border-radius:12px;padding:12px 14px;font-size:13px;margin-top:10px}
 .dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
 .dash .card{padding:14px;box-shadow:none;background:var(--bg2)}
-.dash h5{margin:0 0 8px;font-size:12px;color:var(--coral2);text-transform:uppercase;letter-spacing:.08em}
+.dash h5{margin:0 0 8px;font-size:12px;color:var(--accent-text);text-transform:uppercase;letter-spacing:.08em}
 .dash .cb{position:relative;height:200px}
 .md-out h1,.md-out h2,.md-out h3{margin:12px 0 6px;font-size:15px;letter-spacing:-.01em}
 .md-out h1{font-size:17px}.md-out p{margin:6px 0}.md-out ul,.md-out ol{margin:4px 0;padding-left:20px}
-.md-out table{margin:8px 0;font-size:12.5px}.md-out code{font-family:"JetBrains Mono",monospace;font-size:12px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:5px}
-.md-out pre{background:#0a0914;border:1px solid var(--line);border-radius:10px;padding:10px;overflow:auto;font-size:12px}
+.md-out table{margin:8px 0;font-size:12.5px}.md-out code{font-family:"JetBrains Mono",monospace;font-size:12px;background:var(--chip);padding:1px 5px;border-radius:5px}
+.md-out pre{background:var(--code-bg);color:var(--code-text);border:1px solid var(--line);border-radius:10px;padding:10px;overflow:auto;font-size:12px}
 details.raw{margin-top:10px;font-size:12px;color:var(--muted)}details.raw pre{max-height:260px;overflow:auto;white-space:pre-wrap;font-size:11px}
 .footer{margin-top:30px;color:var(--muted);font-size:12px;text-align:center}
 .step{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;font-size:13px;color:var(--muted)}
@@ -114,7 +124,10 @@ details.raw{margin-top:10px;font-size:12px;color:var(--muted)}details.raw pre{ma
     <div class="logo">MA</div>
     <div><h1>Mesa de Análise</h1><p>AI for Business · Sindusfarma · Encontro 2</p></div>
   </div>
-  <div class="status" id="status" title="Configurar n8n"><span class="dot" id="dot"></span><span id="statusTxt">n8n não configurado</span></div>
+  <div class="row" style="gap:8px">
+    <button class="status" id="themeBtn" title="Alternar tema" style="font:inherit"><span id="themeIcon">☾</span><span id="themeTxt">Escuro</span></button>
+    <div class="status" id="status" title="Configurar n8n"><span class="dot" id="dot"></span><span id="statusTxt">n8n não configurado</span></div>
+  </div>
 </header>
 
 <nav>
@@ -213,14 +226,14 @@ details.raw{margin-top:10px;font-size:12px;color:var(--muted)}details.raw pre{ma
   </div>
 </section>
 
-<div class="footer">Mesa de Análise · página única, sem servidor próprio · chamadas vão para o n8n configurado · dados fictícios</div>
+<div class="footer">Mesa de Análise · página única, sem servidor próprio · chamadas vão para o n8n configurado · dados fictícios · <a href="https://github.com/josercf/sindusfarma">github.com/josercf/sindusfarma</a></div>
 </div>
 
 <div class="modal" id="modal">
   <div class="card">
     <h2>Conexão</h2><h3>Onde está o seu n8n?</h3>
     <label>URL base dos webhooks</label>
-    <input id="cfgUrl" placeholder="https://seu-n8n.app.n8n.cloud/webhook">
+    <input id="cfgUrl" placeholder="https://inteli.app.n8n.cloud/webhook">
     <div class="hint">Os caminhos usados são <code>/analisar</code>, <code>/perguntar</code> e <code>/agente</code>. Fica salvo só neste navegador.</div>
     <div class="row" style="margin-top:16px"><button class="btn primary" id="cfgSave">Salvar e testar</button><button class="btn ghost" id="cfgClose">Fechar</button></div>
   </div>
@@ -235,6 +248,13 @@ const toast=(m,err)=>{const t=$('#toast');t.textContent=m;t.className='toast sho
 const ls={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+// ---------- tema ----------
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);$('#themeIcon').textContent=t==='light'?'☀':'☾';$('#themeTxt').textContent=t==='light'?'Claro':'Escuro';ls.set('mesa.theme',t);
+  if(window.Chart){Chart.defaults.color=cssVar('--tick');} document.querySelectorAll('canvas').forEach(c=>{const ch=window.Chart&&Chart.getChart(c); if(ch){ch.options.scales&&Object.values(ch.options.scales).forEach(sc=>{sc.ticks&&(sc.ticks.color=cssVar('--tick'));sc.grid&&sc.grid.color!==undefined&&(sc.grid.color=cssVar('--gridline'));}); ch.options.plugins&&ch.options.plugins.legend&&ch.options.plugins.legend.labels&&(ch.options.plugins.legend.labels.color=cssVar('--tick')); ch.update();}});}
+(function(){const saved=ls.get('mesa.theme',null); const pref=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'; applyTheme(saved||pref);})();
+$('#themeBtn').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');
+
 // ---------- navegação ----------
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));
@@ -242,7 +262,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 });
 
 // ---------- config n8n ----------
-S.cfg=ls.get('mesa.cfg',{url:''});
+S.cfg=ls.get('mesa.cfg',{url:'https://inteli.app.n8n.cloud/webhook'});
 function setStatus(state,txt){$('#dot').className='dot '+(state||'');$('#statusTxt').textContent=txt}
 function renderCfg(){ if(S.cfg.url){setStatus('',`n8n: ${S.cfg.url.replace(/^https?:\/\//,'').slice(0,34)}`)} else setStatus('','n8n não configurado'); }
 renderCfg();
@@ -335,8 +355,8 @@ function renderAnalise(d){
   $('#chartbox').style.display='';
   const cats={};itens.forEach(i=>{const k=i.classificacao||'outro';cats[k]=(cats[k]||0)+1});
   if(S.chart)S.chart.destroy();
-  if(window.Chart){S.chart=new Chart($('#chart'),{type:'bar',data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['#ff5a47','#ffc857','#7aa2ff','#a8a3c7','#5ee6b8'],borderRadius:8}]},
-    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#a8a3c7'},grid:{display:false}},y:{ticks:{color:'#a8a3c7',precision:0},grid:{color:'rgba(46,42,82,.6)'}}},maintainAspectRatio:false}});}
+  if(window.Chart){S.chart=new Chart($('#chart'),{type:'bar',data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:Object.keys(cats).map(k=>({ea:'#ff5a47',qt:'#ffc857',pi:'#7aa2ff',ou:'#a8a3c7'})[tagClass(k)]),borderRadius:8}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:cssVar('--tick')},grid:{display:false}},y:{ticks:{color:cssVar('--tick'),precision:0},grid:{color:cssVar('--gridline')}}},maintainAspectRatio:false}});}
   // table
   const th=$('#tabela thead'),tb=$('#tabela tbody');
   th.innerHTML='<tr><th>ID</th><th>Classificação</th><th>Gravidade</th><th>Motivo</th><th>Trecho citado</th><th>Alerta</th></tr>';
@@ -378,7 +398,7 @@ function chartCard(spec,title){
   else datasets=Object.entries(V).map(([k,v],i)=>({label:k,data:v,backgroundColor:PALETTE[i%PALETTE.length],borderColor:PALETTE[i%PALETTE.length],borderRadius:6}));
   let type=(spec.tipo||spec.type||'bar').toLowerCase(); if(/pizza|pie/.test(type))type='doughnut'; else if(/linha|line/.test(type))type='line'; else if(/horizontal/.test(type))type='bar'; else if(!['bar','line','doughnut','pie','radar'].includes(type))type='bar';
   const el=document.createElement('div');el.className='card';el.innerHTML=`<h5>${esc(spec.titulo||spec.title||title||'Gráfico')}</h5><div class="cb"><canvas id="${id}"></canvas></div>${spec.leitura||spec.comentario?`<div class="hint">${esc(spec.leitura||spec.comentario)}</div>`:''}`;
-  setTimeout(()=>{ if(!window.Chart) return; new Chart(document.getElementById(id),{type,data:{labels:L,datasets},options:{maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1||type==='doughnut',labels:{color:'#a8a3c7'}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#a8a3c7'},grid:{display:false}},y:{ticks:{color:'#a8a3c7'},grid:{color:'rgba(46,42,82,.6)'}}}}}); },0);
+  setTimeout(()=>{ if(!window.Chart) return; new Chart(document.getElementById(id),{type,data:{labels:L,datasets},options:{maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1||type==='doughnut',labels:{color:cssVar('--tick')}}},scales:type==='doughnut'?{}:{x:{ticks:{color:cssVar('--tick')},grid:{display:false}},y:{ticks:{color:cssVar('--tick')},grid:{color:cssVar('--gridline')}}}}}); },0);
   return el;
 }
 function tableCard(spec,title){
